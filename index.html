@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Festival des Jeux — Vichy Pro 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --mulberry: #7D2248;
+  --mulberry-dark: #5A1834;
+  --mulberry-light: #A94B72;
+  --gold: #C98A3E;
+  --paper: #FBF7F3;
+  --card: #FFFFFF;
+  --ink: #241A1F;
+  --ink-soft: #6E5D65;
+  --line: #E9DFE2;
+  --heart: #C2405C;
+  --ok: #3E7D5A;
+  --radius: 14px;
+  --shell-max: 560px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper: #201A1D; --card: #2B2226; --ink: #F3EAEC; --ink-soft: #B9A6AE; --line: #45373C;
+  }
+}
+:root[data-theme="dark"]{
+  --paper: #201A1D; --card: #2B2226; --ink: #F3EAEC; --ink-soft: #B9A6AE; --line: #45373C;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+html,body{margin:0; padding:0; background:var(--paper); color:var(--ink); font-family:'Inter',system-ui,sans-serif;}
+body{ padding-bottom: calc(64px + env(safe-area-inset-bottom)); min-height:100vh; }
+h1,h2,h3{font-family:'Inter',system-ui,sans-serif; margin:0; font-weight:600;}
+button{font-family:inherit;}
+#shell{max-width:var(--shell-max); margin:0 auto; position:relative;}
+.topbar{ position:sticky; top:0; z-index:20; background:var(--paper); padding:18px 18px 10px; border-bottom:1px solid var(--line); text-align:center;}
+.topbar h1{font-size:1.35rem; line-height:1.15; color:var(--mulberry-dark);}
+.topbar .sub{font-size:.8rem; color:var(--ink-soft); margin-top:2px;}
+.search-row{display:flex; gap:8px; margin-top:12px;}
+input[type=text], input[type=email], input[type=search], select, textarea{
+  width:100%; border:1px solid var(--line); background:var(--card); color:var(--ink);
+  border-radius:10px; padding:10px 12px; font-size:.95rem; font-family:inherit;
+}
+textarea{resize:vertical; min-height:64px;}
+.pubfilter{max-width:150px; flex-shrink:0;}
+main{padding:14px 16px 24px;}
+.game-card{
+  background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+  padding:13px 14px; margin-bottom:9px; display:flex; align-items:center; justify-content:space-between;
+  gap:10px; cursor:pointer; transition:border-color .15s;
+}
+.game-card:active{border-color:var(--mulberry-light);}
+.game-card .gname{font-weight:400; font-size:.95rem;}
+.game-card .gpub{font-size:.8rem; color:var(--ink-soft); margin-top:1px;}
+.game-card .gmeta{display:flex; align-items:center; gap:6px; flex-shrink:0; font-size:.82rem; color:var(--ink-soft);}
+.game-card .gmeta .heart-mini{color:var(--heart);}
+.pub-group{margin-bottom:8px; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:var(--card);}
+.pub-header{
+  width:100%; display:flex; align-items:center; justify-content:space-between; padding:13px 14px;
+  background:none; border:none; cursor:pointer; text-align:left;
+}
+.pub-header .pubname{font-weight:600; font-size:.95rem;}
+.pub-header .pub-count{font-size:.8rem; color:var(--ink-soft); display:flex; align-items:center; gap:6px;}
+.pub-header .chev{color:var(--mulberry-light); font-size:.75rem;}
+.pub-body{border-top:1px solid var(--line);}
+.pub-body .game-card{border:none; border-radius:0; border-bottom:1px solid var(--line); margin-bottom:0; padding:11px 14px;}
+.pub-body .game-card:last-child{border-bottom:none;}
+.game-card.done{background:#F3E9EE;}
+:root[data-theme="dark"] .game-card.done{background:#3A2A32;}
+.game-card .check{color:var(--ok); font-weight:700; margin-right:4px;}
+.gcard-icons{display:flex; align-items:center; gap:6px; flex-shrink:0;}
+.gcard-icons .heart-mini{color:var(--heart); font-size:.85rem;}
+.flag-toggle{background:none; border:none; padding:4px; margin:-4px; cursor:pointer; color:var(--line); line-height:0;}
+.flag-toggle svg{width:19px; height:19px;}
+.flag-toggle.active{color:var(--gold);}
+.pill{display:inline-flex; align-items:center; gap:4px; padding:3px 9px; border-radius:999px; font-size:.75rem; font-weight:500;}
+.pill.score{background:var(--mulberry); color:#fff;}
+.empty{text-align:center; color:var(--ink-soft); padding:40px 20px; font-size:.9rem;}
+.fab-add{
+  display:flex; align-items:center; justify-content:center; gap:8px; width:100%;
+  background:var(--mulberry); color:#fff; border:none; border-radius:12px; padding:13px; font-weight:600;
+  font-size:.95rem; margin-top:6px; cursor:pointer;
+}
+.fab-add:active{background:var(--mulberry-dark);}
+ 
+/* bottom nav */
+nav.bottom{
+  position:fixed; bottom:0; left:0; right:0; z-index:60; background:var(--card);
+  border-top:1px solid var(--line); display:flex; padding-bottom:env(safe-area-inset-bottom);
+}
+nav.bottom .navwrap{max-width:var(--shell-max); margin:0 auto; display:flex; width:100%;}
+nav.bottom button{
+  flex:1; background:none; border:none; padding:9px 4px 7px; display:flex; flex-direction:column;
+  align-items:center; gap:3px; color:var(--ink-soft); font-size:.72rem; cursor:pointer;
+}
+nav.bottom button.active{color:var(--mulberry);}
+nav.bottom svg{width:22px; height:22px;}
+ 
+/* modal / sheet */
+.overlay{position:fixed; inset:0; background:rgba(20,10,15,.45); z-index:50; display:none;}
+.overlay.open{display:block;}
+.sheet{
+  position:fixed; top:0; left:0; right:0; bottom:calc(64px + env(safe-area-inset-bottom));
+  background:var(--paper); z-index:51; display:none;
+  max-width:var(--shell-max); margin:0 auto; overflow-y:auto; -webkit-overflow-scrolling:touch;
+}
+.sheet.open{display:block;}
+.sheet-header{
+  position:sticky; top:0; background:var(--paper); z-index:5; padding:14px 16px 8px;
+  border-bottom:1px solid var(--line);
+}
+.sheet-title-row{display:flex; align-items:flex-start; justify-content:space-between; gap:10px;}
+.sheet-title-main{min-width:0;}
+.sheet-stats{text-align:right; flex-shrink:0;}
+.sheet-stats .ssAvg{font-family:'Inter',system-ui,sans-serif; font-weight:700; font-size:1.3rem; color:var(--mulberry-dark); line-height:1.1;}
+.sheet-stats .ssSub{font-size:.72rem; color:var(--ink-soft); margin-top:2px; line-height:1.3; max-width:140px;}
+.sheet-stats .stat-lines{display:flex; flex-direction:column; align-items:flex-end; gap:5px;}
+.sheet-stats .sheet-stat-cols{display:flex; gap:18px; justify-content:flex-end;}
+.sheet-stats .stat-col{display:flex; flex-direction:column; align-items:flex-end; gap:5px;}
+.sheet-stats .brut-row{display:flex; align-items:baseline; justify-content:flex-end; gap:6px; white-space:nowrap;}
+.sheet-stats .brut-label{font-size:.75rem; color:var(--ink-soft); font-weight:500;}
+.sheet-stats .brut-value{display:flex; align-items:center; gap:4px; font-family:'Inter',system-ui,sans-serif; font-weight:700; font-size:1.25rem; color:var(--mulberry-dark);}
+.sheet-stats .brut-value svg{width:18px; height:18px; color:#E8A63C; flex-shrink:0;}
+.sheet-stats .stat-lines-secondary{display:flex; flex-wrap:wrap; justify-content:flex-end; gap:10px; margin-top:6px;}
+.sheet-stats .stat-lines-secondary .stat-line{font-size:.78rem;}
+.sheet-stats .stat-lines-secondary .stat-line svg{width:14px; height:14px;}
+.sheet-stats .stat-line{display:flex; align-items:center; gap:5px; font-size:.82rem; color:var(--ink-soft); white-space:nowrap;}
+.sheet-stats .stat-line svg{width:15px; height:15px; flex-shrink:0;}
+.sheet-stats .stat-line.stat-score{font-weight:700; color:var(--mulberry-dark); font-size:1.05rem;}
+.sheet-stats .stat-line.stat-score svg{color:#E8A63C;}
+.sheet-stats .stat-line.stat-heart svg, .sheet-stats .stat-line.stat-heart{color:var(--heart);}
+.backbtn{background:none; border:none; color:var(--mulberry); font-size:.92rem; font-weight:600; padding:6px 4px; cursor:pointer; display:flex; align-items:center; gap:4px;}
+.sheet-header h2{font-size:1.15rem; color:var(--mulberry-dark);}
+.sheet-header .gpub{font-size:.82rem; color:var(--ink-soft);}
+.sheet-body{padding:12px 16px 40px;}
+.sheet-body p{font-size:.9rem; line-height:1.55; color:var(--ink); margin:0 0 12px;}
+ 
+.centermodal{position:fixed; inset:0; z-index:52; display:none; align-items:flex-end; justify-content:center;}
+.centermodal.open{display:flex;}
+.centermodal .card{
+  background:var(--card); width:100%; max-width:var(--shell-max); border-radius:18px 18px 0 0;
+  padding:20px 18px calc(20px + env(safe-area-inset-bottom)); max-height:85vh; overflow-y:auto;
+}
+.centermodal h3{font-size:1.05rem; margin-bottom:12px; color:var(--mulberry-dark);}
+label{font-size:.78rem; font-weight:600; color:var(--ink-soft); display:block; margin:10px 0 4px;}
+.formrow{margin-bottom:4px;}
+.btnrow{display:flex; gap:10px; margin-top:16px;}
+.btn-primary{background:var(--mulberry); color:#fff; border:none; border-radius:10px; padding:12px; font-weight:600; flex:1; cursor:pointer;}
+.btn-primary:active{background:var(--mulberry-dark);}
+.btn-ghost{background:none; color:var(--ink-soft); border:1px solid var(--line); border-radius:10px; padding:12px; font-weight:500; flex:1; cursor:pointer;}
+.hint{font-size:.76rem; color:var(--ink-soft); margin-top:10px; line-height:1.4;}
+ 
+/* rating block */
+.mon-avis-box{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:14px; margin-bottom:14px;}
+.statustoggle{display:flex; gap:8px; margin-bottom:12px;}
+.statustoggle button{
+  flex:1; padding:9px; border-radius:10px; border:1px solid var(--line); background:var(--paper);
+  color:var(--ink-soft); font-size:.83rem; font-weight:600; cursor:pointer;
+}
+.statustoggle button.active{background:var(--mulberry); border-color:var(--mulberry); color:#fff;}
+.scoregrid{display:grid; grid-template-columns:repeat(6,1fr); gap:6px; margin-bottom:6px;}
+.scorebtn{
+  aspect-ratio:1; border-radius:11px; border:1px solid var(--line); background:var(--paper);
+  color:var(--ink); font-weight:700; font-size:1.05rem; cursor:pointer; display:flex; align-items:center; justify-content:center;
+}
+.scorebtn.active{background:var(--mulberry); border-color:var(--mulberry); color:#fff; transform:scale(1.05);}
+.score-label{text-align:center; font-size:.82rem; color:var(--mulberry-dark); font-weight:600; min-height:1.2em; margin-bottom:10px;}
+.heart-row{display:flex; align-items:center; gap:10px; padding:8px 2px; border-top:1px solid var(--line); margin-top:2px;}
+.heart-row span{font-size:.9rem; font-weight:500;}
+.heart-toggle{background:none; border:none; font-size:1.5rem; cursor:pointer; line-height:1; color:var(--line); transition:color .15s, transform .15s;}
+.heart-toggle.active{color:var(--heart); transform:scale(1.15);}
+.footer-actions{display:flex; flex-direction:column; gap:10px; margin-top:14px;}
+.footer-buttons{display:flex; align-items:center; justify-content:space-between;}
+.saved-tag{font-size:.72rem; color:var(--ok); opacity:0; transition:opacity .3s; align-self:flex-start;}
+.saved-tag.show{opacity:1;}
+.clearlink{font-size:.78rem; color:var(--ink-soft); background:none; border:none; cursor:pointer; text-decoration:underline; padding:6px 0;}
+.backbtn-bottom{
+  background:var(--mulberry); color:#fff; border:none; border-radius:10px; padding:11px 18px;
+  font-weight:600; font-size:.88rem; cursor:pointer;
+}
+.backbtn-bottom:active{background:var(--mulberry-dark);}
+ 
+.sectiontitle{font-size:.8rem; text-transform:none; color:var(--ink-soft); font-weight:600; margin:20px 0 8px;}
+.review-row{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:11px 13px; margin-bottom:8px;}
+.review-row .rtop{display:flex; justify-content:space-between; align-items:center; font-size:.88rem; font-weight:600;}
+.review-row .rtop .rscore{color:var(--mulberry); display:flex; align-items:center; gap:4px;}
+.review-row .rtop .rscore-heart{color:var(--heart); font-size:1.3rem;}
+.review-row .rstatus{font-size:.76rem; color:var(--ink-soft); margin-top:2px;}
+.review-row .rcomment{font-size:.86rem; margin-top:6px; color:var(--ink); font-style:italic;}
+ 
+.scoremeaning{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:4px 14px;}
+.scoremeaning .row{display:flex; gap:10px; padding:8px 0; border-bottom:1px solid var(--line); font-size:.85rem; align-items:baseline;}
+.scoremeaning .row:last-child{border-bottom:none;}
+.scoremeaning .n{font-weight:700; color:var(--mulberry); width:1.3em; flex-shrink:0;}
+ 
+/* top list */
+.top-row{display:flex; align-items:flex-start; gap:14px; background:var(--card); border:1px solid var(--line); border-radius:16px; padding:11px 15px; margin-bottom:9px;}
+.top-row .pos-badge{
+  width:32px; height:32px; border-radius:50%; background:var(--mulberry); color:#fff;
+  display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.80rem;
+  flex-shrink:0; margin-top:2px;
+}
+.top-row .info{flex:1; min-width:0; padding-top:2px;}
+.top-row .info .n{font-weight:600; font-size:0.8rem; line-height:1.25;}
+.top-row .info .p{font-size:.7rem; color:var(--ink-soft); margin-top:2px;}
+.top-row .stat-lines{
+  flex-shrink:0; display:grid; grid-template-columns:auto auto; grid-auto-rows:auto;
+  column-gap:14px; row-gap:5px; justify-items:end;
+}
+.top-row .stat-line{display:flex; align-items:center; gap:5px; font-size:.85rem; color:var(--ink-soft); white-space:nowrap;}
+.top-row .stat-line svg{width:16px; height:16px; flex-shrink:0;}
+.top-row .stat-line.stat-score{font-weight:700; color:var(--ink); font-size:.95rem;}
+.top-row .stat-line.stat-score svg{color:#E8A63C;}
+.top-row .stat-line.stat-heart svg, .top-row .stat-line.stat-heart{color:var(--heart);}
+ 
+.identity-card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:16px; margin-bottom:18px;}
+.identity-card .name{font-size:1.2rem; color:var(--mulberry-dark); font-weight:600;}
+.identity-card .em{font-size:.82rem; color:var(--ink-soft); margin-top:2px;}
+.identity-card .consent-status{font-size:.78rem; color:var(--ink-soft); margin-top:10px; padding-top:10px; border-top:1px solid var(--line);}
+.moi-filter-row{margin:4px 0 2px;}
+.moi-filter-row label{font-size:.78rem; font-weight:600; color:var(--ink-soft); display:block; margin:0 0 4px;}
+.moi-filter-row select{font-size:.88rem; padding:9px 10px;}
+.linkbtn{background:none; border:none; color:var(--mulberry); font-size:.82rem; font-weight:600; cursor:pointer; padding:0; margin-top:10px; display:block;}
+ 
+.demo-banner{background:#F3E3CA; color:#6B4A1A; font-size:.76rem; padding:8px 14px; text-align:center; line-height:1.4;}
+:root[data-theme="dark"] .demo-banner, @media (prefers-color-scheme: dark){.demo-banner{background:#4A3A1E; color:#E8D2A6;}}
+ 
+.combobox-list{border:1px solid var(--line); border-radius:10px; max-height:150px; overflow-y:auto; margin-top:4px; background:var(--card);}
+.combobox-list div{padding:9px 12px; font-size:.88rem; cursor:pointer; border-bottom:1px solid var(--line);}
+.combobox-list div:last-child{border-bottom:none;}
+.combobox-list div:active{background:var(--paper);}
+.addpub{color:var(--mulberry); font-weight:600;}
+ 
+/* consentement RGPD */
+.consent-check-row{display:flex; align-items:flex-start; gap:10px; cursor:pointer;}
+.consent-check-row input[type=checkbox]{width:19px; height:19px; margin-top:2px; flex-shrink:0; accent-color:var(--mulberry);}
+.consent-check-row span{font-size:.87rem; font-weight:500; line-height:1.4;}
+</style>
+
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<meta name="theme-color" content="#7D2248">
+
+</head>
+<body>
+ 
+<div id="shell">
+  <div id="demoBanner" class="demo-banner" style="display:none;"></div>
+ 
+  <!-- JEUX -->
+  <section id="view-jeux" class="view">
+    <div class="topbar">
+      <h1>Festival des Jeux</h1>
+      <div class="sub">Vichy Pro 2026 · <span id="gameCount">492</span> jeux</div>
+      <div class="search-row">
+        <input type="search" id="searchInput" placeholder="Rechercher un jeu…">
+      </div>
+    </div>
+    <main>
+      <button class="fab-add" id="btnAddGame">+ Ajouter un jeu</button>
+      <div id="gameList" style="margin-top:12px;"></div>
+    </main>
+  </section>
+ 
+  <!-- TOP -->
+  <section id="view-top" class="view" style="display:none;">
+    <div class="topbar">
+      <h1>Top du festival</h1>
+      <div class="sub" id="topSub">Classement basé sur les avis de tous les participants</div>
+      <div class="statustoggle" style="margin-top:10px;">
+        <button id="topModeBrut" data-mode="brut">Top brut</button>
+        <button id="topModeLisse" data-mode="lisse" class="active">Top lissé</button>
+      </div>
+      <div class="statustoggle" style="margin-top:8px;">
+        <button id="topGroupGeneral" data-group="general" class="active">Classement général</button>
+        <button id="topGroupPub" data-group="editeur">Par éditeur</button>
+      </div>
+    </div>
+    <main>
+      <div id="topList"></div>
+    </main>
+  </section>
+ 
+  <!-- MOI -->
+  <section id="view-moi" class="view" style="display:none;">
+    <div class="topbar">
+      <h1>Moi</h1>
+    </div>
+    <main>
+      <div class="identity-card">
+        <div class="name" id="moiName">—</div>
+        <div class="em" id="moiEmail">—</div>
+        <button class="linkbtn" id="btnChangeIdentity">Changer de participant</button>
+        <button class="linkbtn" id="btnManageConsent">Gérer mes données et mon consentement (RGPD)</button>
+        <div class="consent-status" id="moiConsentStatus"></div>
+      </div>
+      <div class="moi-filter-row">
+        <label for="moiPubFilter">Filtrer par éditeur</label>
+        <select id="moiPubFilter">
+          <option value="">Tous les éditeurs</option>
+        </select>
+      </div>
+      <div class="sectiontitle">Mes coups de cœur</div>
+      <div id="mesCoeurs"></div>
+      <div class="sectiontitle">Mes notes</div>
+      <div id="mesNotes"></div>
+    </main>
+  </section>
+</div>
+ 
+<nav class="bottom">
+  <div class="navwrap">
+    <button class="navbtn active" data-view="jeux">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>
+      Jeux
+    </button>
+    <button class="navbtn" data-view="top">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 21h8M12 17v4M6 4h12l-1 8a5 5 0 0 1-10 0L6 4Z"/><path d="M6 6H3a3 3 0 0 0 3 4M18 6h3a3 3 0 0 1-3 4"/></svg>
+      Top
+    </button>
+    <button class="navbtn" data-view="moi">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c1.2-3.8 4-5.5 7-5.5s5.8 1.7 7 5.5"/></svg>
+      Moi
+    </button>
+  </div>
+</nav>
+ 
+<!-- fiche jeu -->
+<div class="overlay" id="sheetOverlay"></div>
+<div class="sheet" id="gameSheet">
+  <div class="sheet-header">
+    <div class="sheet-title-row">
+      <div class="sheet-title-main">
+        <h2 id="sheetGameName">—</h2>
+        <div class="gpub" id="sheetGamePub">—</div>
+      </div>
+      <div class="sheet-stats" id="sheetStats"></div>
+    </div>
+  </div>
+  <div class="sheet-body">
+    <div class="sectiontitle" style="margin-top:4px;">Mon avis</div>
+    <div class="mon-avis-box">
+      <div class="statustoggle">
+        <button id="statusVu" data-status="Vu (pas joué)">Vu (pas joué)</button>
+        <button id="statusJoue" data-status="Joué">Joué</button>
+      </div>
+      <div class="scoregrid" id="scoreGrid"></div>
+      <div class="score-label" id="scoreLabelText"></div>
+      <div class="heart-row">
+        <button class="heart-toggle" id="heartToggle">♥</button>
+        <span>Coup de cœur</span>
+      </div>
+      <label style="margin-top:10px;">Commentaire</label>
+      <textarea id="commentInput" placeholder="Votre avis rapide sur ce jeu…"></textarea>
+      <div class="footer-actions">
+        <span class="saved-tag" id="savedTag"></span>
+        <div class="footer-buttons">
+          <button class="clearlink" id="btnClearReview">Effacer mon avis</button>
+          <button class="backbtn-bottom" id="btnBack">Retour à la liste ›</button>
+        </div>
+      </div>
+    </div>
+ 
+    <div class="sectiontitle">Avis des participants</div>
+    <div id="othersReviews"></div>
+  </div>
+</div>
+ 
+<!-- consentement RGPD -->
+<div class="overlay" id="consentOverlay"></div>
+<div class="sheet" id="consentSheet">
+  <div class="sheet-header">
+    <button class="backbtn" id="btnConsentBack">‹ Retour</button>
+    <h2 style="margin-top:8px;">Mes données et mes votes</h2>
+  </div>
+  <div class="sheet-body">
+    <p>Vos avis et notes sont associés à votre profil dans l'application afin de permettre le fonctionnement du classement et l'affichage des avis des participants.</p>
+    <p>Vos évaluations peuvent également être utilisées pour établir des statistiques, des classements et des analyses sur les jeux.</p>
+    <p>Ces statistiques peuvent être communiquées publiquement sous une forme globale et anonymisée, sans afficher votre nom ni votre boutique.</p>
+    <p>Vos données personnelles et vos votes individuels ne seront pas vendus à des fins commerciales.</p>
+    <div class="mon-avis-box" style="margin-top:6px;">
+      <label class="consent-check-row" style="margin:0;">
+        <input type="checkbox" id="consentCheckbox">
+        <span>J'accepte que mes avis et notes soient utilisés pour établir des statistiques, classements et analyses sur les jeux, y compris pour communiquer publiquement des résultats globaux et anonymisés.</span>
+      </label>
+    </div>
+    <div class="btnrow">
+      <button class="btn-primary" id="btnSaveConsent">Enregistrer mes choix</button>
+    </div>
+    <p class="hint" style="margin-top:14px;">Vous pouvez revenir sur ce choix à tout moment depuis l'onglet « Moi ». Si la case n'est pas cochée, vos avis restent utilisables dans l'application mais ne seront pas inclus dans les exports de données du festival.</p>
+  </div>
+</div>
+ 
+<!-- onboarding -->
+<div class="centermodal" id="onboardModal">
+  <div class="card">
+    <h3>Bienvenue au festival 👋</h3>
+    <div class="formrow"><label>Votre prénom / pseudo</label><input type="text" id="obPseudo" placeholder="Ex. Julie"></div>
+    <div class="formrow"><label>Votre email</label><input type="email" id="obEmail" placeholder="vous@exemple.com"></div>
+    <div class="formrow"><label>Boutique / structure (optionnel)</label><input type="text" id="obShop" placeholder="Ex. Excalibur"></div>
+    <p class="hint">Pas de mot de passe à créer. Votre email sert uniquement à vous recontacter après le festival.</p>
+    <div class="btnrow"><button class="btn-primary" id="btnOnboardStart">Commencer</button></div>
+  </div>
+</div>
+ 
+<!-- ajouter jeu -->
+<div class="centermodal" id="addGameModal">
+  <div class="card">
+    <h3>Ajouter un jeu</h3>
+    <div class="formrow"><label>Nom du jeu *</label><input type="text" id="newGameName"></div>
+    <div class="formrow">
+      <label>Éditeur *</label>
+      <input type="text" id="newGamePub" placeholder="Rechercher ou créer un éditeur…" autocomplete="off">
+      <div class="combobox-list" id="pubSuggestions" style="display:none;"></div>
+    </div>
+    <div class="btnrow">
+      <button class="btn-ghost" id="btnCancelAddGame">Annuler</button>
+      <button class="btn-primary" id="btnSaveGame">Ajouter</button>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+"use strict";
+ 
+/* ---------- config ---------- */
+const CONFIG = { API_URL: "https://script.google.com/macros/s/AKfycbwLI3RInodPyJAzXH5PLr9HOR9zeP_Oc-URnY4AoKG8zIz7uPnU34UgO-kHQ3pkAL87/exec" };
+ 
+/* ---------- seed ---------- */
+const SEED = { games: [], publishers: [] };
+const SCORE_LABELS = {
+  0:"Jamais", 1:"Bof", 2:"Ok game", 3:"Pourquoi pas", 4:"Bon jeu / J'en prends", 5:"Excellent / Banger"
+};
+ 
+/* ---------- storage helpers ---------- */
+function loadLocal(key, fallback){
+  try{ const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }catch(e){ return fallback; }
+}
+function saveLocal(key, val){ try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){} }
+ 
+/* ---------- state ---------- */
+let identity = loadLocal('ffdv_identity', null);
+let addedGames = loadLocal('ffdv_added_games', []);
+let addedPubs = loadLocal('ffdv_added_pubs', []);
+let reviews = loadLocal('ffdv_reviews_v1', {}); // key: email::gameId
+let moiPubFilter = loadLocal('ffdv_moi_pub_filter', '');
+ 
+let serverGames = [];
+function allGames(){
+  const map = new Map();
+  serverGames.forEach(g => map.set(String(g.id), g));
+  addedGames.forEach(g => { if(!map.has(String(g.id))) map.set(String(g.id), g); });
+  return Array.from(map.values());
+}
+function pubKey(name){ return String(name||'').trim().toLowerCase(); }
+function pubDisplay(name){
+  return pubKey(name).replace(/\S+/g, w => w.charAt(0).toUpperCase() + w.slice(1));
+}
+function allPubs(){
+  const seen = new Map(); // key -> display name
+  serverGames.map(g=>g.pub).concat(addedPubs).forEach(p=>{
+    const k = pubKey(p);
+    if(!seen.has(k)) seen.set(k, pubDisplay(p));
+  });
+  return Array.from(seen.values()).sort((a,b)=>a.localeCompare(b,'fr'));
+}
+function reviewKey(email, gameId){ return email+'::'+gameId; }
+function myReview(gameId){ return identity ? reviews[reviewKey(identity.email, gameId)] : null; }
+function reviewsForGame(gameId){
+  return Object.values(reviews).filter(r => String(r.gameId) === String(gameId));
+}
+function evalScore(r){
+  if(r.score === null || r.score === undefined || r.score === '') {
+    return r.favorite ? 5 : null;
+  }
+  return Number(r.score);
+}
+ 
+/* ---------- API layer (local fallback; swap to fetch once CONFIG.API_URL is set) ---------- */
+const api = {
+  async fetchAll(){
+    if(!CONFIG.API_URL) return;
+    try{
+      const res = await fetch(CONFIG.API_URL + (CONFIG.API_URL.indexOf('?')>-1 ? '&' : '?') + 'action=data', {method:'GET'});
+      const data = await res.json();
+      if(data.reviews){
+        // les données serveur font autorité pour tout le monde ; on garde un avis local
+        // non encore confirmé par le serveur s'il est plus récent (écriture en cours).
+        Object.entries(data.reviews).forEach(([key, rev])=>{
+          const local = reviews[key];
+          if(!local || new Date(rev.updatedAt) >= new Date(local.updatedAt || 0)){
+            reviews[key] = rev;
+          }
+        });
+        saveLocal('ffdv_reviews_v1', reviews);
+      }
+      if(Array.isArray(data.games)){
+        serverGames = data.games;
+        // Keep only locally-added games that are not already present on the server.
+        const serverIds = new Set(serverGames.map(g=>String(g.id)));
+        addedGames = addedGames.filter(g=>!serverIds.has(String(g.id)));
+        saveLocal('ffdv_added_games', addedGames);
+      }
+      if(data.identities && identity && data.identities[identity.email]){
+        // le consentement enregistré côté serveur fait autorité (utile si l'utilisateur
+        // change d'appareil) : on aligne l'état local dessus.
+        const srv = data.identities[identity.email];
+        identity.consent = !!srv.consent;
+        identity.consentDate = srv.consentDate || identity.consentDate || null;
+        saveLocal('ffdv_identity', identity);
+      }
+    }catch(e){ /* pas de connexion : on continue avec les données locales */ }
+  },
+  async saveReview(rev){
+    reviews[reviewKey(rev.email, rev.gameId)] = rev;
+    saveLocal('ffdv_reviews_v1', reviews);
+    if(CONFIG.API_URL){
+      try{ await fetch(CONFIG.API_URL, {method:'POST', mode:'no-cors', body: JSON.stringify({action:'save_review', ...rev})}); }catch(e){}
+    }
+  },
+  async deleteReview(email, gameId){
+    delete reviews[reviewKey(email, gameId)];
+    saveLocal('ffdv_reviews_v1', reviews);
+    if(CONFIG.API_URL){
+      try{ await fetch(CONFIG.API_URL, {method:'POST', mode:'no-cors', body: JSON.stringify({action:'delete_review', email, gameId})}); }catch(e){}
+    }
+  },
+  async addGame(game){
+    addedGames.push(game);
+    saveLocal('ffdv_added_games', addedGames);
+    if(CONFIG.API_URL){
+      try{ await fetch(CONFIG.API_URL, {method:'POST', mode:'no-cors', body: JSON.stringify({action:'add_game', ...game})}); }catch(e){}
+    }
+  },
+  async saveIdentity(ident){
+    if(CONFIG.API_URL){
+      try{
+        await fetch(CONFIG.API_URL, {method:'POST', mode:'no-cors', body: JSON.stringify({
+          action:'save_identity', email: ident.email, pseudo: ident.pseudo, shop: ident.shop || '',
+          consent: !!ident.consent, consentDate: ident.consentDate || ''
+        })});
+      }catch(e){}
+    }
+  }
+};
+ 
+/* ---------- demo banner ---------- */
+function refreshBanner(){
+  const b = document.getElementById('demoBanner');
+  if(!CONFIG.API_URL){
+    b.style.display = 'block';
+    b.textContent = "Mode démo : vos avis sont enregistrés sur cet appareil uniquement, pas encore partagés avec les autres participants.";
+  } else {
+    b.style.display = 'none';
+  }
+}
+ 
+/* ---------- navigation ---------- */
+const views = ['jeux','top','moi'];
+// empreinte légère de l'état local, pour ne reconstruire l'affichage
+// (et risquer de "perdre" un clic en cours) que si des données ont
+// réellement changé après le rafraîchissement réseau.
+function dataSignature(){
+  let lastUpdate = '';
+  Object.values(reviews).forEach(r=>{ if(r.updatedAt && r.updatedAt > lastUpdate) lastUpdate = r.updatedAt; });
+  return Object.keys(reviews).length + ':' + lastUpdate + ':' + allGames().length;
+}
+async function showView(name){
+  views.forEach(v => document.getElementById('view-'+v).style.display = (v===name ? '' : 'none'));
+  document.querySelectorAll('.navbtn').forEach(b => b.classList.toggle('active', b.dataset.view===name));
+  const before = dataSignature();
+  if(name==='top'){ renderTop(); await api.fetchAll(); if(dataSignature()!==before) renderTop(); }
+  if(name==='moi'){ renderMoi(); await api.fetchAll(); if(dataSignature()!==before) renderMoi(); }
+  if(name==='jeux'){ renderGameList(); await api.fetchAll(); if(dataSignature()!==before) renderGameList(); }
+}
+function closeSheets(){
+  document.getElementById('sheetOverlay').classList.remove('open');
+  document.getElementById('gameSheet').classList.remove('open');
+  document.getElementById('consentOverlay').classList.remove('open');
+  document.getElementById('consentSheet').classList.remove('open');
+}
+document.querySelectorAll('.navbtn').forEach(b => b.addEventListener('click', ()=>{ closeSheets(); showView(b.dataset.view); }));
+document.getElementById('topModeLisse').addEventListener('click', ()=>{
+  topMode = 'lisse';
+  document.getElementById('topModeLisse').classList.add('active');
+  document.getElementById('topModeBrut').classList.remove('active');
+  renderTop();
+});
+document.getElementById('topModeBrut').addEventListener('click', ()=>{
+  topMode = 'brut';
+  document.getElementById('topModeBrut').classList.add('active');
+  document.getElementById('topModeLisse').classList.remove('active');
+  renderTop();
+});
+document.getElementById('topGroupGeneral').addEventListener('click', ()=>{
+  topGroupMode = 'general';
+  document.getElementById('topGroupGeneral').classList.add('active');
+  document.getElementById('topGroupPub').classList.remove('active');
+  renderTop();
+});
+document.getElementById('topGroupPub').addEventListener('click', ()=>{
+  topGroupMode = 'editeur';
+  document.getElementById('topGroupPub').classList.add('active');
+  document.getElementById('topGroupGeneral').classList.remove('active');
+  renderTop();
+});
+ 
+/* ---------- onboarding ---------- */
+function ensureIdentity(){
+  if(!identity){
+    document.getElementById('onboardModal').classList.add('open');
+  } else {
+    document.getElementById('onboardModal').classList.remove('open');
+    document.getElementById('moiName').textContent = identity.pseudo;
+    document.getElementById('moiEmail').textContent = identity.email + (identity.shop ? ' · '+identity.shop : '');
+    document.getElementById('moiConsentStatus').textContent = identity.consent
+      ? 'Consentement RGPD : donné ✓'
+      : 'Consentement RGPD : non donné';
+  }
+}
+document.getElementById('btnOnboardStart').addEventListener('click', ()=>{
+  const pseudo = document.getElementById('obPseudo').value.trim();
+  const email = document.getElementById('obEmail').value.trim();
+  const shop = document.getElementById('obShop').value.trim();
+  if(!pseudo || !email || !email.includes('@')){
+    alert('Merci de renseigner un pseudo et un email valide.');
+    return;
+  }
+  identity = {pseudo, email, shop, consent:false, consentDate:null};
+  saveLocal('ffdv_identity', identity);
+  ensureIdentity();
+  api.saveIdentity(identity);
+  renderGameList();
+  openConsent(true);
+});
+document.getElementById('btnChangeIdentity').addEventListener('click', ()=>{
+  if(confirm('Changer de participant ? Vous devrez ressaisir vos infos.')){
+    identity = null;
+    saveLocal('ffdv_identity', null);
+    document.getElementById('obPseudo').value='';
+    document.getElementById('obEmail').value='';
+    document.getElementById('obShop').value='';
+    ensureIdentity();
+  }
+});
+ 
+/* ---------- consentement RGPD ---------- */
+function openConsent(){
+  document.getElementById('consentCheckbox').checked = !!(identity && identity.consent);
+  document.getElementById('consentOverlay').classList.add('open');
+  document.getElementById('consentSheet').classList.add('open');
+  document.getElementById('consentSheet').scrollTop = 0;
+}
+function closeConsent(){
+  document.getElementById('consentOverlay').classList.remove('open');
+  document.getElementById('consentSheet').classList.remove('open');
+  ensureIdentity();
+  renderMoi();
+}
+document.getElementById('btnConsentBack').addEventListener('click', closeConsent);
+document.getElementById('consentOverlay').addEventListener('click', closeConsent);
+document.getElementById('btnManageConsent').addEventListener('click', ()=>openConsent());
+document.getElementById('btnSaveConsent').addEventListener('click', async ()=>{
+  if(!identity) return;
+  identity.consent = document.getElementById('consentCheckbox').checked;
+  identity.consentDate = new Date().toISOString();
+  saveLocal('ffdv_identity', identity);
+  await api.saveIdentity(identity);
+  closeConsent();
+});
+ 
+/* ---------- Jeux list ---------- */
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+ 
+function isReviewed(gameId){
+  const mine = myReview(gameId);
+  return !!(mine && ((mine.score !== null && mine.score !== undefined) || mine.favorite));
+}
+ 
+let expandedPubs = new Set();
+let listScrollY = 0;
+ 
+function renderGameList(){
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+
+  // Normalisation défensive : une valeur inattendue dans Games
+  // ne doit jamais faire disparaître toute la liste.
+  const games = allGames().map(g => ({
+    id: g && g.id != null ? g.id : ('local-' + Date.now() + '-' + Math.random()),
+    pub: g && g.pub != null ? String(g.pub).trim() : '',
+    name: g && g.name != null ? String(g.name).trim() : ''
+  })).filter(g => g.name !== '');
+
+  document.getElementById('gameCount').textContent = games.length;
+
+  const byPub = {};
+  games.forEach(g => {
+    const pub = g.pub || 'Sans éditeur';
+    const k = pubKey(pub);
+    if(!byPub[k]) byPub[k] = {display: pubDisplay(pub), games: []};
+    byPub[k].games.push(g);
+  });
+
+  const pubKeys = Object.keys(byPub).sort((a,b)=>
+    String(byPub[a].display).localeCompare(String(byPub[b].display),'fr')
+  );
+
+  let html = '';
+  let anyVisible = false;
+
+  pubKeys.forEach(k => {
+    const pub = byPub[k].display;
+
+    let gamesInPub = byPub[k].games.slice().sort((a,b)=>
+      String(a.name).localeCompare(String(b.name),'fr')
+    );
+
+    if(q){
+      gamesInPub = gamesInPub.filter(g =>
+        String(g.name).toLowerCase().includes(q)
+      );
+    }
+
+    if(gamesInPub.length === 0) return;
+    anyVisible = true;
+
+    const isOpen = q ? true : expandedPubs.has(k);
+
+    html += `<div class="pub-group">
+      <button class="pub-header" data-pub="${escapeHtml(k)}">
+        <span class="pubname">${escapeHtml(pub)}</span>
+        <span class="pub-count">${gamesInPub.length} jeu${gamesInPub.length>1?'x':''} <span class="chev">${isOpen?'▾':'▸'}</span></span>
+      </button>
+      <div class="pub-body" style="display:${isOpen ? '' : 'none'}">
+        ${gamesInPub.map(g=>{
+          const mine = myReview(g.id);
+          const done = isReviewed(g.id);
+          const watched = mine && mine.watch;
+
+          return `<div class="game-card${done ? ' done' : ''}" data-id="${escapeHtml(g.id)}">
+            <div class="gname">${done ? '<span class="check">✓</span>' : ''}${escapeHtml(g.name)}</div>
+            <div class="gcard-icons">
+              ${mine && mine.favorite ? '<span class="heart-mini">♥</span>' : ''}
+              <button class="flag-toggle${watched ? ' active' : ''}" data-flag-id="${escapeHtml(g.id)}" title="À surveiller">
+                <svg viewBox="0 0 24 24" fill="${watched ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.8"><path d="M5 21V4c0-.6.4-1 1-1h11.3c.8 0 1.2.9.7 1.5L14.5 9l3.5 4.5c.5.6.1 1.5-.7 1.5H6v6"/></svg>
+              </button>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  });
+
+  const el = document.getElementById('gameList');
+  el.innerHTML = anyVisible ? html : '<div class="empty">Aucun jeu trouvé. Ajoutez-le !</div>';
+
+  el.querySelectorAll('.pub-header').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const pub = btn.dataset.pub;
+      listScrollY = window.scrollY;
+      if(expandedPubs.has(pub)) expandedPubs.delete(pub);
+      else expandedPubs.add(pub);
+      renderGameList();
+      requestAnimationFrame(()=>window.scrollTo(0, listScrollY));
+    });
+  });
+
+  el.querySelectorAll('.game-card').forEach(card=>{
+    card.addEventListener('click', ()=>openGameSheet(card.dataset.id));
+  });
+
+  el.querySelectorAll('.flag-toggle').forEach(btn=>{
+    btn.addEventListener('click', (ev)=>{
+      ev.stopPropagation();
+      toggleWatch(btn.dataset.flagId);
+    });
+  });
+}
+document.getElementById('searchInput').addEventListener('input', renderGameList);
+ 
+function toggleWatch(gameId){
+  if(!identity) return;
+  const existing = myReview(gameId) || {status:'Vu (pas joué)', score:null, favorite:false, comment:'', watch:false};
+  const rev = {
+    email: identity.email, pseudo: identity.pseudo, gameId: gameId,
+    status: existing.status, score: existing.score, favorite: existing.favorite,
+    comment: existing.comment, watch: !existing.watch, updatedAt: new Date().toISOString()
+  };
+  const y = window.scrollY;
+  api.saveReview(rev);
+  renderGameList();
+  requestAnimationFrame(()=>window.scrollTo(0, y));
+  if(String(currentGameId) === String(gameId)) curWatch = rev.watch;
+}
+ 
+/* ---------- ajouter un jeu ---------- */
+document.getElementById('btnAddGame').addEventListener('click', ()=>{
+  document.getElementById('newGameName').value='';
+  document.getElementById('newGamePub').value='';
+  document.getElementById('pubSuggestions').style.display='none';
+  document.getElementById('addGameModal').classList.add('open');
+});
+document.getElementById('btnCancelAddGame').addEventListener('click', ()=>{
+  document.getElementById('addGameModal').classList.remove('open');
+});
+document.getElementById('newGamePub').addEventListener('input', function(){
+  const q = this.value.trim().toLowerCase();
+  const box = document.getElementById('pubSuggestions');
+  if(!q){ box.style.display='none'; return; }
+  const matches = allPubs().filter(p=>p.toLowerCase().includes(q)).slice(0,6);
+  let html = matches.map(p=>`<div data-pub="${escapeHtml(p)}">${escapeHtml(p)}</div>`).join('');
+  const exact = allPubs().some(p=>p.toLowerCase()===q);
+  if(!exact) html += `<div class="addpub" data-newpub="${escapeHtml(this.value.trim())}">+ Créer l'éditeur "${escapeHtml(this.value.trim())}"</div>`;
+  box.innerHTML = html;
+  box.style.display = 'block';
+  box.querySelectorAll('div').forEach(d=>{
+    d.addEventListener('click', ()=>{
+      document.getElementById('newGamePub').value = d.dataset.pub || d.dataset.newpub;
+      box.style.display='none';
+    });
+  });
+});
+document.getElementById('btnSaveGame').addEventListener('click', async ()=>{
+  const name = document.getElementById('newGameName').value.trim();
+  const pub = document.getElementById('newGamePub').value.trim();
+  if(!name || !pub){ alert('Nom du jeu et éditeur sont requis.'); return; }
+  if(!allPubs().some(p=>p.toLowerCase()===pub.toLowerCase())){
+    addedPubs.push(pub);
+    saveLocal('ffdv_added_pubs', addedPubs);
+  }
+  const newGame = {id: 'local-'+Date.now(), pub, name};
+  await api.addGame(newGame);
+  document.getElementById('addGameModal').classList.remove('open');
+  renderGameList();
+});
+ 
+/* ---------- fiche jeu ---------- */
+let currentGameId = null;
+let savedListScrollY = 0;
+function renderSheetStats(gameId){
+  const grs = reviewsForGame(gameId);
+  const evals = grs.map(evalScore).filter(v=>v!==null);
+  const el = document.getElementById('sheetStats');
+  if(evals.length === 0){
+    el.innerHTML = '<div class="ssSub">Pas encore noté</div>';
+    return;
+  }
+  const avg = evals.reduce((a,b)=>a+b,0)/evals.length;
+  const joueCount = grs.filter(r=>r.status==='Joué').length;
+  const heartCount = grs.filter(r=>r.favorite).length;
+  el.innerHTML = `
+    <div class="brut-row">
+      <span class="brut-label">note brute</span>
+      <span class="brut-value">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l2.9 6.2 6.7.8-5 4.6 1.4 6.7L12 17.6l-6 3.2 1.4-6.7-5-4.6 6.7-.8L12 2.5z"/></svg>
+        ${avg.toFixed(1)}/5
+      </span>
+    </div>
+    <div class="stat-lines-secondary">
+      <div class="stat-line">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5c-1.3 0-2.5-.3-3.6-.8L4 21l1.8-4.9A8.5 8.5 0 1 1 21 11.5Z"/></svg>
+        <span>${evals.length} avis</span>
+      </div>
+      <div class="stat-line">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="8" width="20" height="10" rx="5"/><path d="M7 12h3M8.5 10.5v3"/><circle cx="16" cy="11.5" r="1"/><circle cx="18.5" cy="14" r="1"/></svg>
+        <span>${joueCount} joué${joueCount>1?'s':''}</span>
+      </div>
+      <div class="stat-line stat-heart">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.5-4.6-10.2-9.2C.3 8.9 1.6 5.5 4.9 4.8c1.9-.4 3.7.4 4.9 2C11 5.2 12.9 4.4 14.8 4.8c3.3.7 4.6 4.1 3.1 7C15.2 16.4 12 21 12 21Z"/></svg>
+        <span>${heartCount}</span>
+      </div>
+    </div>
+  `;
+}
+function openGameSheet(gameId){
+  savedListScrollY = window.scrollY;
+  currentGameId = gameId;
+  const g = allGames().find(x=>String(x.id)===String(gameId));
+  if(!g) return;
+  document.getElementById('sheetGameName').textContent = g.name;
+  document.getElementById('sheetGamePub').textContent = pubDisplay(g.pub);
+ 
+  // on ouvre la fiche d'abord, quoi qu'il arrive : une erreur de calcul sur
+  // les stats/avis d'un jeu ne doit jamais empêcher sa fiche de s'ouvrir.
+  document.getElementById('sheetOverlay').classList.add('open');
+  document.getElementById('gameSheet').classList.add('open');
+  document.getElementById('gameSheet').scrollTop = 0;
+ 
+  try{ renderSheetStats(gameId); }
+  catch(e){ console.error('renderSheetStats a échoué pour', gameId, e); document.getElementById('sheetStats').innerHTML = '<div class="ssSub">Statistiques indisponibles</div>'; }
+ 
+  const grid = document.getElementById('scoreGrid');
+  grid.innerHTML = [0,1,2,3,4,5].map(n=>`<button class="scorebtn" data-score="${n}">${n}</button>`).join('');
+  grid.querySelectorAll('.scorebtn').forEach(b=>b.addEventListener('click', ()=>setScore(Number(b.dataset.score))));
+ 
+  const mine = myReview(gameId) || {status:'Vu (pas joué)', score:null, favorite:false, comment:'', watch:false};
+  curWatch = !!mine.watch;
+  setStatus(mine.status, false);
+  setScore(mine.score, false);
+  setHeart(mine.favorite, false);
+  document.getElementById('commentInput').value = mine.comment || '';
+ 
+  try{ renderOthersReviews(gameId); }
+  catch(e){ console.error('renderOthersReviews a échoué pour', gameId, e); document.getElementById('othersReviews').innerHTML = '<div class="empty">Avis indisponibles pour le moment.</div>'; }
+ 
+  // rafraîchit avec les données serveur en arrière-plan, sans bloquer l'ouverture
+  api.fetchAll().then(()=>{
+    if(currentGameId !== gameId) return; // l'utilisateur a changé de fiche entretemps
+    try{ renderSheetStats(gameId); }catch(e){ console.error(e); }
+    try{ renderOthersReviews(gameId); }catch(e){ console.error(e); }
+  });
+}
+function closeGameSheet(){
+  document.getElementById('sheetOverlay').classList.remove('open');
+  document.getElementById('gameSheet').classList.remove('open');
+  renderGameList();
+  requestAnimationFrame(()=>window.scrollTo(0, savedListScrollY));
+}
+document.getElementById('btnBack').addEventListener('click', closeGameSheet);
+document.getElementById('sheetOverlay').addEventListener('click', closeGameSheet);
+ 
+let curStatus = 'Vu (pas joué)', curScore = null, curFavorite = false, curWatch = false;
+function setStatus(s, persist){
+  curStatus = s;
+  document.getElementById('statusVu').classList.toggle('active', s==='Vu (pas joué)');
+  document.getElementById('statusJoue').classList.toggle('active', s==='Joué');
+  if(persist!==false) persistReview();
+}
+function setScore(n, persist){
+  curScore = n;
+  document.querySelectorAll('.scorebtn').forEach(b=>b.classList.toggle('active', Number(b.dataset.score)===n));
+  document.getElementById('scoreLabelText').textContent = (n===null||n===undefined) ? '' : SCORE_LABELS[n];
+  if(persist!==false) persistReview();
+}
+function setHeart(v, persist){
+  curFavorite = !!v;
+  document.getElementById('heartToggle').classList.toggle('active', curFavorite);
+  if(persist!==false) persistReview();
+}
+document.getElementById('statusVu').addEventListener('click', ()=>setStatus('Vu (pas joué)'));
+document.getElementById('statusJoue').addEventListener('click', ()=>setStatus('Joué'));
+document.getElementById('heartToggle').addEventListener('click', ()=>setHeart(!curFavorite));
+ 
+let commentTimer = null;
+document.getElementById('commentInput').addEventListener('input', ()=>{
+  clearTimeout(commentTimer);
+  commentTimer = setTimeout(persistReview, 500);
+});
+ 
+async function persistReview(){
+  if(!identity || !currentGameId) return;
+  const rev = {
+    email: identity.email, pseudo: identity.pseudo, gameId: currentGameId,
+    status: curStatus, score: curScore, favorite: curFavorite, watch: curWatch,
+    comment: document.getElementById('commentInput').value, updatedAt: new Date().toISOString()
+  };
+  await api.saveReview(rev);
+  showSyncTag('saving');
+  renderOthersReviews(currentGameId);
+  renderSheetStats(currentGameId);
+  verifySync(rev);
+}
+ 
+let syncCheckTimer = null;
+function showSyncTag(state){
+  const tag = document.getElementById('savedTag');
+  clearTimeout(tag._t);
+  tag.classList.add('show');
+  if(state === 'saving'){
+    tag.textContent = 'Enregistrement…';
+    tag.style.color = 'var(--ink-soft)';
+  } else if(state === 'ok'){
+    tag.textContent = 'Synchronisé ✓';
+    tag.style.color = 'var(--ok)';
+    tag._t = setTimeout(()=>tag.classList.remove('show'), 2000);
+  } else if(state === 'error'){
+    tag.textContent = '⚠ Non synchronisé — vérifiez la connexion';
+    tag.style.color = 'var(--heart)';
+  }
+}
+function verifySync(rev){
+  if(!CONFIG.API_URL) { showSyncTag('ok'); return; }
+  clearTimeout(syncCheckTimer);
+  syncCheckTimer = setTimeout(async ()=>{
+    try{
+      const res = await fetch(CONFIG.API_URL + (CONFIG.API_URL.indexOf('?')>-1 ? '&' : '?') + 'action=data', {method:'GET'});
+      const data = await res.json();
+      const key = rev.email + '::' + rev.gameId;
+      const serverRev = data.reviews && data.reviews[key];
+      if(serverRev && String(serverRev.status) === String(rev.status) &&
+         String(serverRev.score) === String(rev.score) &&
+         String(serverRev.favorite) === String(rev.favorite)){
+        showSyncTag('ok');
+      } else {
+        showSyncTag('error');
+      }
+    }catch(e){
+      showSyncTag('error');
+    }
+  }, 1500);
+}
+document.getElementById('btnClearReview').addEventListener('click', async ()=>{
+  if(!identity || !currentGameId) return;
+  if(!confirm('Effacer votre avis sur ce jeu ?')) return;
+  await api.deleteReview(identity.email, currentGameId);
+  setStatus('Vu (pas joué)', false);
+  setScore(null, false);
+  setHeart(false, false);
+  curWatch = false;
+  document.getElementById('commentInput').value='';
+  renderOthersReviews(currentGameId);
+  renderSheetStats(currentGameId);
+});
+ 
+function renderOthersReviews(gameId){
+  const list = reviewsForGame(gameId).filter(r => !identity || r.email !== identity.email);
+  const el = document.getElementById('othersReviews');
+  if(list.length===0){ el.innerHTML = '<div class="empty">Aucun autre avis pour l\'instant.</div>'; return; }
+  el.innerHTML = list.map(r=>`
+    <div class="review-row">
+      <div class="rtop">
+        <span>${escapeHtml(r.pseudo)}</span>
+        <span class="rscore">${r.favorite ? '♥ ' : ''}${(r.score!==null && r.score!==undefined) ? r.score+'/5' : ''}</span>
+      </div>
+      <div class="rstatus">${escapeHtml(r.status)}</div>
+      ${r.comment ? `<div class="rcomment">"${escapeHtml(r.comment)}"</div>` : ''}
+    </div>`).join('');
+}
+ 
+/* ---------- Top ---------- */
+let topMode = 'lisse';
+let topGroupMode = 'general';
+let expandedTopPubs = new Set();
+ 
+function computeBayesConstants(rows){
+  // moyenne bayésienne : un jeu avec peu d'avis est tiré vers la moyenne
+  // générale du festival (C), un jeu avec beaucoup d'avis se fie à sa
+  // propre moyenne (avg). m = nombre moyen d'avis par jeu noté.
+  let C = 0, totalEvals = 0;
+  rows.forEach(r => { C += r.avg * r.count; totalEvals += r.count; });
+  C = totalEvals > 0 ? C / totalEvals : 0;
+  const m = rows.length > 0 ? totalEvals / rows.length : 0;
+  return {C, m};
+}
+ 
+function computeTopRows(){
+  const games = allGames();
+  let rows = games.map(g=>{
+    const grs = reviewsForGame(g.id);
+    const evals = grs.map(evalScore).filter(v=>v!==null);
+    if(evals.length===0) return null;
+    const avg = evals.reduce((a,b)=>a+b,0)/evals.length;
+    const hearts = grs.filter(r=>r.favorite).length;
+    const joues = grs.filter(r=>r.status==='Joué').length;
+    return {game:g, avg, count:evals.length, hearts, joues, total:grs.length};
+  }).filter(Boolean);
+ 
+  const {C, m} = computeBayesConstants(rows);
+  rows.forEach(r => { r.weighted = (r.count/(r.count+m))*r.avg + (m/(r.count+m))*C; });
+  return rows;
+}
+ 
+function sortTopRows(rows){
+  if(topMode === 'lisse'){
+    rows.sort((a,b)=>
+      b.weighted - a.weighted ||
+      b.count - a.count ||
+      b.hearts - a.hearts ||
+      a.game.name.localeCompare(b.game.name,'fr')
+    );
+  } else {
+    rows.sort((a,b)=>
+      b.avg - a.avg ||
+      b.hearts - a.hearts ||
+      b.joues - a.joues ||
+      b.total - a.total ||
+      a.game.name.localeCompare(b.game.name,'fr')
+    );
+  }
+  return rows;
+}
+ 
+function topRowHtml(r, pos){
+  return `<div class="top-row" data-id="${r.game.id}">
+    <div class="pos-badge">${pos}</div>
+    <div class="info">
+      <div class="n">${escapeHtml(r.game.name)}</div>
+      <div class="p">${escapeHtml(r.game.pub)}</div>
+    </div>
+    <div class="stat-lines">
+      <div class="stat-line">
+        ${topMode==='lisse'
+          ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2.5l2.9 6.2 6.7.8-5 4.6 1.4 6.7L12 17.6l-6 3.2 1.4-6.7-5-4.6 6.7-.8L12 2.5z"/></svg><span>${r.avg.toFixed(1)} brut</span>`
+          : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="8" width="20" height="10" rx="5"/><path d="M7 12h3M8.5 10.5v3"/><circle cx="16" cy="11.5" r="1"/><circle cx="18.5" cy="14" r="1"/></svg><span>${r.joues} joué${r.joues>1?'s':''}</span>`
+        }
+      </div>
+      <div class="stat-line stat-score">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l2.9 6.2 6.7.8-5 4.6 1.4 6.7L12 17.6l-6 3.2 1.4-6.7-5-4.6 6.7-.8L12 2.5z"/></svg>
+        <span>${(topMode==='lisse' ? r.weighted : r.avg).toFixed(1)}/5</span>
+      </div>
+      <div class="stat-line">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5c-1.3 0-2.5-.3-3.6-.8L4 21l1.8-4.9A8.5 8.5 0 1 1 21 11.5Z"/></svg>
+        <span>${r.count} avis</span>
+      </div>
+      <div class="stat-line stat-heart">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.5-4.6-10.2-9.2C.3 8.9 1.6 5.5 4.9 4.8c1.9-.4 3.7.4 4.9 2C11 5.2 12.9 4.4 14.8 4.8c3.3.7 4.6 4.1 3.1 7C15.2 16.4 12 21 12 21Z"/></svg>
+        <span>${r.hearts}</span>
+      </div>
+    </div>
+  </div>`;
+}
+ 
+function renderTop(){
+  const rows = sortTopRows(computeTopRows());
+ 
+  document.getElementById('topSub').textContent = topMode === 'lisse'
+    ? "Classement lissé : tient compte du nombre d'avis, pas seulement de la moyenne"
+    : "Classement brut : moyenne pure, sans pondération";
+ 
+  const el = document.getElementById('topList');
+  if(rows.length===0){ el.innerHTML = '<div class="empty">Aucune évaluation pour l\'instant. Notez un jeu pour lancer le classement !</div>'; return; }
+ 
+  if(topGroupMode === 'general'){
+    el.innerHTML = rows.map((r,i)=>topRowHtml(r, i+1)).join('');
+    el.querySelectorAll('.top-row').forEach(row=>row.addEventListener('click', ()=>openGameSheet(row.dataset.id)));
+    return;
+  }
+ 
+  // groupé par éditeur : classement propre à chaque éditeur
+  const byPub = {}; // key -> {display, rows}
+  rows.forEach(r => {
+    const k = pubKey(r.game.pub);
+    if(!byPub[k]) byPub[k] = {display: pubDisplay(r.game.pub), rows: []};
+    byPub[k].rows.push(r);
+  });
+  const pubKeys = Object.keys(byPub).sort((a,b)=>byPub[a].display.localeCompare(byPub[b].display,'fr'));
+ 
+  el.innerHTML = pubKeys.map(k=>{
+    const pub = byPub[k].display;
+    const list = byPub[k].rows;
+    const isOpen = expandedTopPubs.has(k);
+    return `<div class="pub-group">
+      <button class="pub-header" data-pub="${escapeHtml(k)}">
+        <span class="pubname">${escapeHtml(pub)}</span>
+        <span class="pub-count">${list.length} jeu${list.length>1?'x':''} noté${list.length>1?'s':''} <span class="chev">${isOpen?'▾':'▸'}</span></span>
+      </button>
+      <div class="pub-body" style="display:${isOpen ? '' : 'none'}">
+        ${list.map((r,i)=>topRowHtml(r, i+1)).join('')}
+      </div>
+    </div>`;
+  }).join('');
+ 
+  el.querySelectorAll('.pub-header').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const pub = btn.dataset.pub;
+      if(expandedTopPubs.has(pub)) expandedTopPubs.delete(pub);
+      else expandedTopPubs.add(pub);
+      renderTop();
+    });
+  });
+  el.querySelectorAll('.top-row').forEach(row=>row.addEventListener('click', ()=>openGameSheet(row.dataset.id)));
+}
+ 
+/* ---------- Moi ---------- */
+function renderMoi(){
+  if(!identity) return;
+  document.getElementById('moiName').textContent = identity.pseudo;
+  document.getElementById('moiEmail').textContent = identity.email + (identity.shop ? ' · '+identity.shop : '');
+  document.getElementById('moiConsentStatus').textContent = identity.consent
+    ? 'Consentement RGPD : donné ✓'
+    : 'Consentement RGPD : non donné';
+
+  const mine = Object.values(reviews).filter(r=>r.email===identity.email);
+  const games = allGames();
+  const gById = Object.fromEntries(games.map(g=>[String(g.id), g]));
+
+  // Liste des éditeurs présents dans mes avis / coups de cœur.
+  const myPubMap = new Map();
+  mine.forEach(r=>{
+    const g = gById[r.gameId];
+    if(!g) return;
+    const key = pubKey(g.pub);
+    if(!myPubMap.has(key)) myPubMap.set(key, pubDisplay(g.pub));
+  });
+
+  const pubSelect = document.getElementById('moiPubFilter');
+  if(pubSelect){
+    const previous = moiPubFilter;
+    pubSelect.innerHTML = '<option value="">Tous les éditeurs</option>' +
+      Array.from(myPubMap.entries())
+        .sort((a,b)=>a[1].localeCompare(b[1],'fr'))
+        .map(([key,display])=>`<option value="${escapeHtml(key)}">${escapeHtml(display)}</option>`)
+        .join('');
+
+    if(previous && myPubMap.has(previous)){
+      pubSelect.value = previous;
+    } else {
+      moiPubFilter = '';
+      pubSelect.value = '';
+    }
+  }
+
+  const filteredMine = moiPubFilter
+    ? mine.filter(r=>{
+        const g = gById[r.gameId];
+        return g && pubKey(g.pub) === moiPubFilter;
+      })
+    : mine;
+
+  const notes = filteredMine
+    .filter(r=>r.score!==null && r.score!==undefined)
+    .sort((a,b)=> b.score - a.score || (gById[a.gameId]?.name||'').localeCompare(gById[b.gameId]?.name||'','fr'));
+
+  const coeurs = filteredMine.filter(r=>r.favorite);
+
+  document.getElementById('mesNotes').innerHTML = notes.length ? notes.map(r=>{
+    const g = gById[r.gameId]; if(!g) return '';
+    return `<div class="review-row" data-id="${g.id}"><div class="rtop"><span>${escapeHtml(g.name)}</span><span class="rscore">${r.score}/5${r.favorite ? ' <span class="rscore-heart">♥</span>' : ''}</span></div><div class="rstatus">${escapeHtml(pubDisplay(g.pub))}</div></div>`;
+  }).join('') : '<div class="empty">Vous n\'avez pas encore noté de jeu pour cet éditeur.</div>';
+
+  document.getElementById('mesCoeurs').innerHTML = coeurs.length ? coeurs.map(r=>{
+    const g = gById[r.gameId]; if(!g) return '';
+    return `<div class="review-row" data-id="${g.id}"><div class="rtop"><span>${escapeHtml(g.name)}</span><span class="rscore rscore-heart">♥</span></div><div class="rstatus">${escapeHtml(pubDisplay(g.pub))}</div></div>`;
+  }).join('') : '<div class="empty">Aucun coup de cœur pour cet éditeur.</div>';
+
+  document.querySelectorAll('#mesNotes .review-row, #mesCoeurs .review-row').forEach(row=>{
+    row.style.cursor = 'pointer';
+    row.addEventListener('click', ()=>openGameSheet(row.dataset.id));
+  });
+}
+
+document.getElementById('moiPubFilter').addEventListener('change', (e)=>{
+  moiPubFilter = e.target.value;
+  saveLocal('ffdv_moi_pub_filter', moiPubFilter);
+  renderMoi();
+});
+ 
+/* ---------- init ---------- */
+renderGameList();
+ensureIdentity();
+refreshBanner();
+api.fetchAll().then(()=>{ renderGameList(); renderMoi(); });
+ 
+})();
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('./service-worker.js').catch(function () {});
+  });
+}
+</script>
+
+</body>
+</html>
+ 
