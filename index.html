@@ -450,7 +450,9 @@ let addedPubs = loadLocal('ffdv_added_pubs', []);
 let reviews = loadLocal('ffdv_reviews_v1', {}); // key: email::gameId
 let moiPubFilter = loadLocal('ffdv_moi_pub_filter', '');
  
-let serverGames = [];
+// Cache local des jeux du serveur : permet d'afficher la liste immédiatement
+// au prochain démarrage, puis de la mettre à jour en arrière-plan.
+let serverGames = loadLocal('ffdv_server_games_v1', []);
 function allGames(){
   const map = new Map();
   serverGames.forEach(g => map.set(String(g.id), g));
@@ -501,6 +503,9 @@ const api = {
       }
       if(Array.isArray(data.games)){
         serverGames = data.games;
+        // On mémorise la liste serveur pour le prochain démarrage :
+        // l'application pourra l'afficher immédiatement sans attendre Google.
+        saveLocal('ffdv_server_games_v1', serverGames);
         // Keep only locally-added games that are not already present on the server.
         const serverIds = new Set(serverGames.map(g=>String(g.id)));
         addedGames = addedGames.filter(g=>!serverIds.has(String(g.id)));
