@@ -850,13 +850,13 @@ function renderGameList(){
   el.querySelectorAll('.flag-toggle').forEach(btn=>{
     btn.addEventListener('click', (ev)=>{
       ev.stopPropagation();
-      toggleWatch(btn.dataset.flagId);
+      toggleWatch(btn.dataset.flagId, btn);
     });
   });
 }
 document.getElementById('searchInput').addEventListener('input', renderGameList);
  
-function toggleWatch(gameId){
+function toggleWatch(gameId, button){
   if(!identity) return;
   const existing = myReview(gameId) || {status:'Vu (pas joué)', score:null, favorite:false, comment:'', watch:false};
   const rev = {
@@ -864,10 +864,16 @@ function toggleWatch(gameId){
     status: existing.status, score: existing.score, favorite: existing.favorite,
     comment: existing.comment, watch: !existing.watch, updatedAt: new Date().toISOString()
   };
-  const y = window.scrollY;
+
+  // Mise à jour visuelle immédiate : on ne reconstruit plus toute la liste (ou le Top).
+  if(button){
+    button.classList.toggle('active', rev.watch);
+    const svg = button.querySelector('svg');
+    if(svg) svg.setAttribute('fill', rev.watch ? 'currentColor' : 'none');
+  }
+
+  // La sauvegarde reste asynchrone et continue d'utiliser la file hors connexion.
   api.saveReview(rev);
-  renderGameList();
-  requestAnimationFrame(()=>window.scrollTo(0, y));
   if(String(currentGameId) === String(gameId)) curWatch = rev.watch;
 }
  
@@ -1217,7 +1223,7 @@ function renderTop(){
     el.querySelectorAll('.flag-toggle').forEach(btn=>{
       btn.addEventListener('click', (ev)=>{
         ev.stopPropagation();
-        toggleWatch(btn.dataset.flagId);
+        toggleWatch(btn.dataset.flagId, btn);
       });
     });
     return;
@@ -1259,7 +1265,7 @@ function renderTop(){
   el.querySelectorAll('.flag-toggle').forEach(btn=>{
     btn.addEventListener('click', (ev)=>{
       ev.stopPropagation();
-      toggleWatch(btn.dataset.flagId);
+      toggleWatch(btn.dataset.flagId, btn);
     });
   });
 }
