@@ -428,7 +428,105 @@ label{font-size:.78rem; font-weight:600; color:var(--ink-soft); display:block; m
 <script>
 (function(){
 "use strict";
- 
+ /* ============================================================
+   ALERTES TECHNIQUES — TOP JEUX PRO
+   ============================================================ */
+
+function reportClientError(type, error, detail){
+
+  try{
+
+    if(!CONFIG.API_URL) return;
+
+    const message =
+      error && error.message
+        ? error.message
+        : String(error || 'Erreur inconnue');
+
+    const stack =
+      error && error.stack
+        ? error.stack
+        : '';
+
+    const payload = {
+
+      action: 'log_error',
+
+      type: String(type || 'javascript').slice(0,100),
+
+      message:
+        String(message).slice(0,1000),
+
+      detail:
+        String(
+          detail || stack
+        ).slice(0,2000),
+
+      page:
+        window.location.href,
+
+      userAgent:
+        navigator.userAgent,
+
+      online:
+        navigator.onLine,
+
+      at:
+        new Date().toISOString()
+
+    };
+
+    fetch(
+      CONFIG.API_URL,
+      {
+        method: 'POST',
+        mode: 'no-cors',
+        body: JSON.stringify(payload)
+      }
+    ).catch(function(){});
+
+  }
+
+  catch(e){
+
+    /* Une erreur dans le système d'alerte
+       ne doit jamais perturber l'application. */
+
+  }
+
+}
+
+
+/* Erreurs JavaScript non prévues */
+
+window.addEventListener(
+  'error',
+  function(event){
+
+    reportClientError(
+      'javascript',
+      event.error || event.message,
+      'Erreur JavaScript non prévue'
+    );
+
+  }
+);
+
+
+/* Promesses rejetées sans traitement */
+
+window.addEventListener(
+  'unhandledrejection',
+  function(event){
+
+    reportClientError(
+      'promise',
+      event.reason,
+      'Promesse rejetée sans traitement'
+    );
+
+  }
+);
 /* ---------- config ---------- */
 const CONFIG = { API_URL: "https://script.google.com/macros/s/AKfycbwLI3RInodPyJAzXH5PLr9HOR9zeP_Oc-URnY4AoKG8zIz7uPnU34UgO-kHQ3pkAL87/exec" };
 
