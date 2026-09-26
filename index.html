@@ -483,6 +483,67 @@ function evalScore(r){
   return Number(r.score);
 }
  
+/* ---------- Synchronisation hors connexion ---------- */
+let syncInProgress = false;
+
+async function syncPendingReviews(){
+  if(syncInProgress || !CONFIG.API_URL) return;
+
+  const pending = loadLocal('ffdv_pending_reviews_v1', {});
+  const keys = Object.keys(pending || {});
+  if(!keys.length) return;
+
+  syncInProgress = true;
+
+  try{
+    for(const key of keys){
+      const rev = pending[key];
+      if(!rev) continue;
+
+      // On tente d'abord l'écriture sur Google Apps Script.
+      try{
+        await fetch(CONFIG.API_URL, {
+          method:'POST',
+          mode:'no-cors',
+          body: JSON.stringify({action:'save_review', ...rev})
+        });
+      }catch(e){
+        // Toujours hors connexion : on conserve l'avis dans la file.
+        continue;
+      }
+
+      // no-cors ne permet pas de lire la réponse du POST.
+      // On vérifie donc avec une lecture GET que Google Sheets contient bien l'avis.
+      try{
+        const res = await fetch(CONFIG.API_URL + (CONFIG.API_URL.indexOf('?')>-1 ? '&' : '?') + 'action=data', {method:'GET'});
+        const data = await res.json();
+        const serverRev = data.reviews && data.reviews[key];
+
+        const same = serverRev &&
+          String(serverRev.status) === String(rev.status) &&
+          String(serverRev.score) === String(rev.score) &&
+          String(serverRev.favorite) === String(rev.favorite) &&
+          String(!!serverRev.watch) === String(!!rev.watch) &&
+          String(serverRev.comment || '') === String(rev.comment || '');
+
+        if(same){
+          delete pending[key];
+          saveLocal('ffdv_pending_reviews_v1', pending);
+          if(String(currentGameId) === String(rev.gameId)) showSyncTag('ok');
+        }
+      }catch(e){
+        // La vérification a échoué : on garde l'avis en attente.
+      }
+    }
+  }finally{
+    syncInProgress = false;
+  }
+}
+
+window.addEventListener('online', ()=>{
+  syncPendingReviews();
+});
+
 /* ---------- API layer (local fallback; swap to fetch once CONFIG.API_URL is set) ---------- */
 const api = {
   async fetchAll(){
@@ -522,11 +583,18 @@ const api = {
     }catch(e){ /* pas de connexion : on continue avec les données locales */ }
   },
   async saveReview(rev){
-    reviews[reviewKey(rev.email, rev.gameId)] = rev;
+    const key = reviewKey(rev.email, rev.gameId);
+
+    reviews[key] = rev;
     saveLocal('ffdv_reviews_v1', reviews);
-    if(CONFIG.API_URL){
-      try{ await fetch(CONFIG.API_URL, {method:'POST', mode:'no-cors', body: JSON.stringify({action:'save_review', ...rev})}); }catch(e){}
-    }
+
+    // Toute nouvelle modification reste dans la file tant que
+    // Google Sheets n'a pas confirmé sa réception.
+    const pending = loadLocal('ffdv_pending_reviews_v1', {});
+    pending[key] = rev;
+    saveLocal('ffdv_pending_reviews_v1', pending);
+
+    await syncPendingReviews();
   },
   async deleteReview(email, gameId){
     delete reviews[reviewKey(email, gameId)];
@@ -1000,8 +1068,16 @@ function verifySync(rev){
       const serverRev = data.reviews && data.reviews[key];
       if(serverRev && String(serverRev.status) === String(rev.status) &&
          String(serverRev.score) === String(rev.score) &&
-         String(serverRev.favorite) === String(rev.favorite)){
+         String(serverRev.favorite) === String(rev.favorite) &&
+         String(!!serverRev.watch) === String(!!rev.watch) &&
+         String(serverRev.comment || '') === String(rev.comment || '')){
         showSyncTag('ok');
+        const pending = loadLocal('ffdv_pending_reviews_v1', {});
+        const key2 = rev.email + '::' + rev.gameId;
+        if(pending[key2]){
+          delete pending[key2];
+          saveLocal('ffdv_pending_reviews_v1', pending);
+        }
       } else {
         showSyncTag('error');
       }
@@ -1267,7 +1343,11 @@ document.getElementById('moiPubFilter').addEventListener('change', (e)=>{
 renderGameList();
 ensureIdentity();
 refreshBanner();
-api.fetchAll().then(()=>{ renderGameList(); renderMoi(); });
+api.fetchAll().then(async ()=>{
+  renderGameList();
+  renderMoi();
+  await syncPendingReviews();
+});
  
 })();
 </script>
