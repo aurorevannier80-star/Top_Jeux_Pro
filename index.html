@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Top Jeux Pro — Vichy Pro 2026</title>
+<!-- fluidite-fanion-v3 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -865,16 +866,22 @@ function toggleWatch(gameId, button){
     comment: existing.comment, watch: !existing.watch, updatedAt: new Date().toISOString()
   };
 
-  // Mise à jour visuelle immédiate : on ne reconstruit plus toute la liste (ou le Top).
+  // 1) Mise à jour locale immédiate : le bouton doit changer sans attendre Google.
+  reviews[reviewKey(rev.email, rev.gameId)] = rev;
+  saveLocal('ffdv_reviews_v1', reviews);
+
+  // 2) Mise à jour visuelle du bouton cliqué uniquement.
   if(button){
     button.classList.toggle('active', rev.watch);
     const svg = button.querySelector('svg');
     if(svg) svg.setAttribute('fill', rev.watch ? 'currentColor' : 'none');
+    button.setAttribute('aria-label', rev.watch ? 'Retirer de la liste à surveiller' : 'Ajouter à la liste à surveiller');
   }
 
-  // La sauvegarde reste asynchrone et continue d'utiliser la file hors connexion.
-  api.saveReview(rev);
   if(String(currentGameId) === String(gameId)) curWatch = rev.watch;
+
+  // 3) Synchronisation en arrière-plan. Aucun renderTop/renderGameList ici.
+  api.saveReview(rev).catch(()=>{});
 }
  
 /* ---------- ajouter un jeu ---------- */
