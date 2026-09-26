@@ -867,7 +867,6 @@ function toggleWatch(gameId){
   const y = window.scrollY;
   api.saveReview(rev);
   renderGameList();
-  renderTop();
   requestAnimationFrame(()=>window.scrollTo(0, y));
   if(String(currentGameId) === String(gameId)) curWatch = rev.watch;
 }
