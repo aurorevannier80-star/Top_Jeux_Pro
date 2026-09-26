@@ -139,7 +139,7 @@ nav.bottom svg{width:22px; height:22px;}
 .sheet-body{padding:12px 16px 40px;}
 .sheet-body p{font-size:.9rem; line-height:1.55; color:var(--ink); margin:0 0 12px;}
  
-.centermodal{position:fixed; inset:0; z-index:52; display:none; align-items:flex-end; justify-content:center;}
+.centermodal{position:fixed; inset:0; z-index:70; display:none; align-items:flex-end; justify-content:center;}
 .centermodal.open{display:flex;}
 .centermodal .card{
   background:var(--card); width:100%; max-width:var(--shell-max); border-radius:18px 18px 0 0;
@@ -794,6 +794,7 @@ function toggleWatch(gameId){
   const y = window.scrollY;
   api.saveReview(rev);
   renderGameList();
+  renderTop();
   requestAnimationFrame(()=>window.scrollTo(0, y));
   if(String(currentGameId) === String(gameId)) curWatch = rev.watch;
 }
@@ -1086,12 +1087,17 @@ function sortTopRows(rows){
 }
  
 function topRowHtml(r, pos){
+  const mine = myReview(r.game.id);
+  const watched = mine && mine.watch;
   return `<div class="top-row" data-id="${r.game.id}">
     <div class="pos-badge">${pos}</div>
     <div class="info">
       <div class="n">${escapeHtml(r.game.name)}</div>
       <div class="p">${escapeHtml(r.game.pub)}</div>
     </div>
+    <button class="flag-toggle${watched ? ' active' : ''}" data-flag-id="${escapeHtml(r.game.id)}" title="À surveiller" aria-label="${watched ? 'Retirer de la liste à surveiller' : 'Ajouter à la liste à surveiller'}">
+      <svg viewBox="0 0 24 24" fill="${watched ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.8"><path d="M5 21V4c0-.6.4-1 1-1h11.3c.8 0 1.2.9.7 1.5L14.5 9l3.5 4.5c.5.6.1 1.5-.7 1.5H6v6"/></svg>
+    </button>
     <div class="stat-lines">
       <div class="stat-line">
         ${topMode==='lisse'
@@ -1128,6 +1134,12 @@ function renderTop(){
   if(topGroupMode === 'general'){
     el.innerHTML = rows.map((r,i)=>topRowHtml(r, i+1)).join('');
     el.querySelectorAll('.top-row').forEach(row=>row.addEventListener('click', ()=>openGameSheet(row.dataset.id)));
+    el.querySelectorAll('.flag-toggle').forEach(btn=>{
+      btn.addEventListener('click', (ev)=>{
+        ev.stopPropagation();
+        toggleWatch(btn.dataset.flagId);
+      });
+    });
     return;
   }
  
@@ -1164,6 +1176,12 @@ function renderTop(){
     });
   });
   el.querySelectorAll('.top-row').forEach(row=>row.addEventListener('click', ()=>openGameSheet(row.dataset.id)));
+  el.querySelectorAll('.flag-toggle').forEach(btn=>{
+    btn.addEventListener('click', (ev)=>{
+      ev.stopPropagation();
+      toggleWatch(btn.dataset.flagId);
+    });
+  });
 }
  
 /* ---------- Moi ---------- */
