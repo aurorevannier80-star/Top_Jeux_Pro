@@ -431,6 +431,44 @@ label{font-size:.78rem; font-weight:600; color:var(--ink-soft); display:block; m
  
 /* ---------- config ---------- */
 const CONFIG = { API_URL: "https://script.google.com/macros/s/AKfycbwLI3RInodPyJAzXH5PLr9HOR9zeP_Oc-URnY4AoKG8zIz7uPnU34UgO-kHQ3pkAL87/exec" };
+
+
+/* ---------- error reporting ---------- */
+let lastErrorReportAt = 0;
+function reportAppError(type, message, detail){
+  const now = Date.now();
+  // Avoid sending the same class of error repeatedly in a short period.
+  if(now - lastErrorReportAt < 30000) return;
+  lastErrorReportAt = now;
+  if(!CONFIG.API_URL) return;
+  const payload = {
+    action: 'log_error',
+    type: String(type || 'unknown'),
+    message: String(message || '').slice(0, 1000),
+    detail: String(detail || '').slice(0, 2000),
+    page: location.href,
+    userAgent: navigator.userAgent,
+    online: navigator.onLine,
+    at: new Date().toISOString()
+  };
+  try{
+    fetch(CONFIG.API_URL, {
+      method:'POST',
+      mode:'no-cors',
+      body: JSON.stringify(payload),
+      keepalive:true
+    }).catch(()=>{});
+  }catch(e){}
+}
+
+window.addEventListener('error', ev=>{
+  reportAppError('javascript', ev.message || 'Erreur JavaScript',
+    (ev.filename ? ev.filename + ':' + ev.lineno + ':' + ev.colno : ''));
+});
+window.addEventListener('unhandledrejection', ev=>{
+  const reason = ev.reason;
+  reportAppError('promise', reason && reason.message ? reason.message : String(reason || 'Erreur Promise'));
+});
  
 /* ---------- seed ---------- */
 const SEED = { games: [], publishers: [] };
@@ -581,7 +619,7 @@ const api = {
         identity.consentDate = srv.consentDate || identity.consentDate || null;
         saveLocal('ffdv_identity', identity);
       }
-    }catch(e){ /* pas de connexion : on continue avec les données locales */ }
+    }catch(e){ reportAppError('fetch_data', e && e.message ? e.message : 'Erreur chargement des données'); /* pas de connexion : on continue avec les données locales */ }
   },
   async saveReview(rev){
     const key = reviewKey(rev.email, rev.gameId);
@@ -601,14 +639,14 @@ const api = {
     delete reviews[reviewKey(email, gameId)];
     saveLocal('ffdv_reviews_v1', reviews);
     if(CONFIG.API_URL){
-      try{ await fetch(CONFIG.API_URL, {method:'POST', mode:'no-cors', body: JSON.stringify({action:'delete_review', email, gameId})}); }catch(e){}
+      try{ await fetch(CONFIG.API_URL, {method:'POST', mode:'no-cors', body: JSON.stringify({action:'delete_review', email, gameId})}); }catch(e){ reportAppError('delete_review', e && e.message ? e.message : 'Erreur suppression avis'); }
     }
   },
   async addGame(game){
     addedGames.push(game);
     saveLocal('ffdv_added_games', addedGames);
     if(CONFIG.API_URL){
-      try{ await fetch(CONFIG.API_URL, {method:'POST', mode:'no-cors', body: JSON.stringify({action:'add_game', ...game})}); }catch(e){}
+      try{ await fetch(CONFIG.API_URL, {method:'POST', mode:'no-cors', body: JSON.stringify({action:'add_game', ...game})}); }catch(e){ reportAppError('add_game', e && e.message ? e.message : 'Erreur ajout jeu'); }
     }
   },
   async saveIdentity(ident){
@@ -618,7 +656,7 @@ const api = {
           action:'save_identity', email: ident.email, pseudo: ident.pseudo, shop: ident.shop || '',
           consent: !!ident.consent, consentDate: ident.consentDate || ''
         })});
-      }catch(e){}
+      }catch(e){ reportAppError('save_identity', e && e.message ? e.message : 'Erreur enregistrement identité'); }
     }
   }
 };
@@ -1095,6 +1133,7 @@ function verifySync(rev){
       }
     }catch(e){
       showSyncTag('error');
+      reportAppError('verify_sync', e && e.message ? e.message : 'Erreur vérification synchronisation');
     }
   }, 1500);
 }
